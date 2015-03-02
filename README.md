@@ -16,23 +16,24 @@ Usage example:
 
 ~~~php
 
-        use diversen\sendfile;
-        $s = new sendfile();
+use diversen\sendfile;
+$s = new sendfile();
         
-        // if you don't set type - we will try to guess it
-        $s->contentType('application/epub+zip');
+// if you don't set type - we will try to guess it
+$s->contentType('application/epub+zip');
         
-        // if you don't set disposition (file name user agent will see)
-        // we will make a file name from file
-        $s->contentDisposition('argh.epub');
+// if you don't set disposition (file name user agent will see)
+// we will make a file name from file
+$s->contentDisposition('test.epub');
         
-        // chunks of 40960 bytes per 0.1 secs
-        // if you don't set this then the values below are the defaults
-        // approx 409600 bytes per sec
-        $s->throttle(0.1, 40960);
+// chunks of 40960 bytes per 0.1 secs
+// if you don't set this then the values below are the defaults
+// approx 409600 bytes per sec
+$s->throttle(0.1, 40960);
 
-        // send the file
-        $s->send($file);
+// send the file
+$s->send($file);
+
 ~~~
 
 # Credits 
