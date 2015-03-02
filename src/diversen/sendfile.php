@@ -13,25 +13,25 @@ class sendfile
      * if false we set content disposition from file that will be sent
      * @var mixed $disposition    
      */
-    public $disposition = false;
+    private $disposition = false;
     
     /**
      * throttle speed in secounds
      * @var float $sec
      */
-    public $sec = 0.1;
+    private $sec = 0.1;
     
     /**
      * bytes per $sec
      * @var int $bytes 
      */
-    public $bytes = 40960;
+    private $bytes = 40960;
     
     /**
      * if contentType is false we try to guess it
      * @var mixed $contentType 
      */
-    public $type = false;
+    private $type = false;
     
     /**
      * set content disposition 
@@ -64,10 +64,9 @@ class sendfile
      * @param type $file
      * @return type
      */
-    public function name ($file) {
+    private function name ($file) {
         $info = pathinfo($file);
-        return $info['basename'];
-        
+        return $info['basename'];  
     }
 
     /**
@@ -102,7 +101,7 @@ class sendfile
 
         header('Content-Type: ' . $this->type);
         header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
-        header("Content-Transfer-Encoding: binary");
+        //header("Content-Transfer-Encoding: binary");
         header('Accept-Ranges: bytes');
 
         // The three lines below basically make the
@@ -161,7 +160,7 @@ class sendfile
      * @param string $path
      * @return string $mime_type 
      */
-    public function getContentType($path) {
+    private function getContentType($path) {
         $result = false;
         if (is_file($path) === true) {
             if (function_exists('finfo_open') === true) {
@@ -182,7 +181,7 @@ class sendfile
     /**
      * clean all buffers
      */
-    public function cleanAll() {
+    private function cleanAll() {
         while (ob_get_level()) {
             ob_end_flush();
         }
