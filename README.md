@@ -12,6 +12,14 @@ See:
 
 Install
 
+With composer add: 
+
+    "diversen/http-send-file": "dev-master",
+
+or more stable: 
+
+     "diversen/http-send-file": "1.0.x",
+
 Usage example: 
 
 ~~~php
