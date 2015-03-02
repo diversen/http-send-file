@@ -12,7 +12,8 @@ See:
 
 Install
 
-With composer add: 
+
+With composer add to your "require" section: 
 
     "diversen/http-send-file": "dev-master",
 
