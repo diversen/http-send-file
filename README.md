@@ -45,6 +45,18 @@ $s->send($file);
 
 ~~~
 
+So you could just do like this: 
+
+~~~php
+
+use diversen\sendfile;
+$s = new sendfile();
+
+// send the file
+$s->send($file);
+
+~~~
+
 # Credits 
 
 Much of the code is taken (and rewritten) from here: 
