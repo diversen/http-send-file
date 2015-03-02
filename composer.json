@@ -1,0 +1,8 @@
+{
+    "name": "diversen/http-send-file",
+    "autoload": {
+        "psr-0" : {
+            "diversen" : "src"
+        }
+    }
+}
