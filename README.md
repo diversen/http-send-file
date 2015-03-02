@@ -41,7 +41,11 @@ $s->contentDisposition('test.epub');
 $s->throttle(0.1, 40960);
 
 // send the file
-$s->send($file);
+try {
+    $s->send($file);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
 
 ~~~
 
@@ -53,7 +57,11 @@ use diversen\sendfile;
 $s = new sendfile();
 
 // send the file
-$s->send($file);
+try {
+    $s->send($file);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
 
 ~~~
 
