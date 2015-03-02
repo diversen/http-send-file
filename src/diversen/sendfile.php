@@ -3,8 +3,8 @@
 namespace diversen;
 
 /**
- * A terribly useful class
- *
+ * 
+ * 
  */
 class sendfile
 {
@@ -80,7 +80,7 @@ class sendfile
     public function send($file_path) {
         
         if (!is_readable($file_path)) {
-            throw new Exception('File not found or inaccessible!');
+            throw new \Exception('File not found or inaccessible!');
         }
 
         $size = filesize($file_path);
@@ -150,9 +150,9 @@ class sendfile
                 $bytes_send += strlen($buffer);
             }
             fclose($file);
-        } else
-            die('Error - can not open file.');
-
+        } else {
+            throw new \Exception('Error - can not open file.');
+        }
         die();
     }
     
@@ -179,11 +179,12 @@ class sendfile
         return $result;
     }
     
+    /**
+     * clean all buffers
+     */
     public function cleanAll() {
-
         while (ob_get_level()) {
             ob_end_flush();
         }
     }
 }
-
