@@ -40,6 +40,9 @@ $s->contentDisposition('test.epub');
 // approx 409600 bytes per sec
 $s->throttle(0.1, 40960);
 
+// file
+$file = '/some/dir/test.epub';
+
 // send the file
 try {
     $s->send($file);
@@ -55,6 +58,9 @@ So you could just do like this:
 
 use diversen\sendfile;
 $s = new sendfile();
+
+// file
+$file = '/some/dir/test.epub';
 
 // send the file
 try {
