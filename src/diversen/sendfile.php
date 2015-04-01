@@ -100,7 +100,7 @@ class sendfile
         }
 
         header('Content-Type: ' . $this->type);
-        header("Content-Disposition: attachment; filename='" . $this->disposition . "'");
+        header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
         //header("Content-Transfer-Encoding: binary");
         header('Accept-Ranges: bytes');
 
