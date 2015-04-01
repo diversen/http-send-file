@@ -54,11 +54,6 @@ try {
 
 So you could just do like this: 
 
-// but check the headers if it is not
-// working as expected as the guessing
-// of content-type does not always works
-// correctly. 
-
 ~~~php
 
 use diversen\sendfile;
@@ -73,6 +68,11 @@ try {
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
+
+// but check the headers if it is not
+// working as expected as the guessing
+// of content-type does not always work
+// correctly. 
 
 ~~~
 
