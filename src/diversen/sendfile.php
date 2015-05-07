@@ -70,13 +70,13 @@ class sendfile
     }
 
     /**
-     * file to send
-     * @param type $file_path
-     * @param type $disposition
-     * @param type $type
+     * Sets-up headers and starts transfering bytes
+     * 
+     * @param string  $file_path
+     * @param boolean $withDisposition
      * @throws Exception
      */
-    public function send($file_path) {
+    public function send($file_path, $withDisposition=TRUE) {
         
         if (!is_readable($file_path)) {
             throw new \Exception('File not found or inaccessible!');
@@ -100,8 +100,9 @@ class sendfile
         }
 
         header('Content-Type: ' . $this->type);
-        header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
-        //header("Content-Transfer-Encoding: binary");
+        if ($withDisposition) {
+            header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
+        }
         header('Accept-Ranges: bytes');
 
         // The three lines below basically make the
@@ -183,7 +184,7 @@ class sendfile
      */
     private function cleanAll() {
         while (ob_get_level()) {
-            ob_end_flush();
+            ob_end_clean();
         }
     }
 }
