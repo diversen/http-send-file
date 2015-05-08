@@ -76,6 +76,19 @@ try {
 
 ~~~
 
+Without sending content-disposition header: 
+
+~~~php
+
+// send the file content-disposition header
+try {
+    $s->send($file, false);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
+
+~~~
+
 # Credits 
 
 Much of the code is taken (and rewritten) from here: 
