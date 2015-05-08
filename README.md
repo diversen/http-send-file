@@ -80,7 +80,7 @@ Without sending content-disposition header:
 
 ~~~php
 
-// send the file content-disposition header
+// without sending content-disposition header
 // 2. param = false
 try {
     $s->send($file, false);
