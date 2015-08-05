@@ -15,9 +15,9 @@ Install
 
 With composer add to your "require" section: 
 
-    "diversen/http-send-file": "dev-master",
+    composer require diversen/http-send-file
 
-or more stable: 
+Or add to `composer.json`
 
      "diversen/http-send-file": "1.0.x",
 
