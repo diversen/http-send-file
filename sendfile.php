@@ -90,12 +90,20 @@ class sendfile
         }
 
         $size = filesize($file_path);
+        $last_modified_time = filemtime($file_path);
+        $etag = sha1(fileinode($file_path).$last_modified_time.$size);
         if (!$this->disposition) {
             $this->disposition = $this->name($file_path);
         }
 
         if (!$this->type) {
             $this->type = $this->getContentType($file_path);
+        }
+
+        $is_range = isset($_SERVER['HTTP_RANGE']);
+        if($is_range && isset($_SERVER['HTTP_IF_RANGE'])){
+            // verify if meanwhile the file is not changed
+            $is_range = $_SERVER['HTTP_IF_RANGE'] == $etag;
         }
 
         // turn off output buffering to decrease cpu usage
@@ -109,6 +117,8 @@ class sendfile
         header('Content-Type: ' . $this->type);
         header('Content-Disposition: ' . ($withDisposition?"attachment":"inline") . '; filename="' . $this->disposition . '"');
         header('Accept-Ranges: bytes');
+        header('Etag: ' . $etag);
+        header('Last-Modified: ' . gmdate("D, d M Y H:i:s", $last_modified_time) . ' GMT');
 
         // The three lines below basically make the
         // download non-cacheable 
@@ -117,7 +127,7 @@ class sendfile
         header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
         // multipart-download and download resuming support
-        if (isset($_SERVER['HTTP_RANGE'])) {
+        if ($is_range) {
             list($a, $range) = explode("=", $_SERVER['HTTP_RANGE'], 2);
             list($range) = explode(",", $range, 2);
             list($range, $range_end) = explode("-", $range);
@@ -134,6 +144,7 @@ class sendfile
             header("Content-Range: bytes $range-$range_end/$size");
         } else {
             $new_length = $size;
+            header("HTTP/1.1 200 OK");
             header("Content-Length: " . $size);
         }
 
@@ -143,7 +154,7 @@ class sendfile
 
         $file = @fopen($file_path, 'r');
         if ($file) {
-            if (isset($_SERVER['HTTP_RANGE'])) {
+            if ($is_range) {
                 fseek($file, $range);
             }
 
