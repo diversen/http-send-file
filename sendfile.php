@@ -1,53 +1,46 @@
 <?php
-/**
- * HTTP Send File classes.
- *
- * @link      https://github.com/diversen/http-send-file/ HTTP send file GitHub project
- * @author    Dennis Iversen <dennis.iversen@gmail.com>
- */
 
 namespace diversen;
 
 /**
- * PHP lib which sends a file with support for (multiple) range requests and throttle.
- * @package diversen
- * @version 1.0.9
+ * 
+ * 
  */
 class sendfile
 {
     //public 
     /**
      * if false we set content disposition from file that will be sent
-     * @var mixed $disposition
+     * @var mixed $disposition    
      */
     private $disposition = false;
-
+    
     /**
      * throttle speed in secounds
      * @var float $sec
      */
     private $sec = 0.1;
-
+    
     /**
      * bytes per $sec
-     * @var int $bytes
+     * @var int $bytes 
      */
     private $bytes = 40960;
-
+    
     /**
      * if contentType is false we try to guess it
-     * @var mixed $type
+     * @var mixed $contentType 
      */
     private $type = false;
-
+    
     /**
-     * set content disposition
-     * @param boolean|string $file_name
+     * set content disposition 
+     * @param type $file_name
      */
     public function contentDisposition ($file_name = false) {
         $this->disposition = $file_name;
     }
-
+    
     /**
      * set throttle speed
      * @param float $sec
@@ -57,7 +50,7 @@ class sendfile
         $this->sec = $sec;
         $this->bytes = $bytes;
     }
-
+    
     /**
      * set content mime type if false we try to guess it
      * @param string $content_type
@@ -68,57 +61,49 @@ class sendfile
 
     /**
      * get name from path info
-     * @param string $file
-     * @return string
+     * @param type $file
+     * @return type
      */
     private function name ($file) {
         $info = pathinfo($file);
-        return $info['basename'];
+        return $info['basename'];  
     }
 
     /**
      * Sets-up headers and starts transfering bytes
-     *
+     * 
      * @param string  $file_path
      * @param boolean $withDisposition
      * @throws Exception
      */
     public function send($file_path, $withDisposition=TRUE) {
-
+        
         if (!is_readable($file_path)) {
             throw new \Exception('File not found or inaccessible!');
         }
 
         $size = filesize($file_path);
-        $last_modified_time = filemtime($file_path);
-        $etag = sha1(fileinode($file_path).$last_modified_time.$size);
         if (!$this->disposition) {
             $this->disposition = $this->name($file_path);
         }
-
+        
         if (!$this->type) {
             $this->type = $this->getContentType($file_path);
         }
 
-        $is_range = isset($_SERVER['HTTP_RANGE']);
-        if($is_range && isset($_SERVER['HTTP_IF_RANGE'])){
-            // verify if meanwhile the file is not changed
-            $is_range = $_SERVER['HTTP_IF_RANGE'] == $etag;
-        }
-
-        // turn off output buffering to decrease cpu usage
+        //turn off output buffering to decrease cpu usage
         $this->cleanAll();
-
+        
         // required for IE, otherwise Content-Disposition may be ignored
         if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
         }
 
         header('Content-Type: ' . $this->type);
-        header('Content-Disposition: ' . ($withDisposition?"attachment":"inline") . '; filename="' . $this->disposition . '"');
+        if ($withDisposition) {
+            header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
+        }
         header('Accept-Ranges: bytes');
-        header('Etag: ' . $etag);
-        header('Last-Modified: ' . gmdate("D, d M Y H:i:s", $last_modified_time) . ' GMT');
 
         // The three lines below basically make the
         // download non-cacheable 
@@ -127,7 +112,7 @@ class sendfile
         header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
         // multipart-download and download resuming support
-        if ($is_range) {
+        if (isset($_SERVER['HTTP_RANGE'])) {
             list($a, $range) = explode("=", $_SERVER['HTTP_RANGE'], 2);
             list($range) = explode(",", $range, 2);
             list($range, $range_end) = explode("-", $range);
@@ -144,17 +129,16 @@ class sendfile
             header("Content-Range: bytes $range-$range_end/$size");
         } else {
             $new_length = $size;
-            header("HTTP/1.1 200 OK");
             header("Content-Length: " . $size);
         }
 
         /* output the file itself */
         $chunksize = $this->bytes; //you may want to change this
         $bytes_send = 0;
-
+        
         $file = @fopen($file_path, 'r');
         if ($file) {
-            if ($is_range) {
+            if (isset($_SERVER['HTTP_RANGE'])) {
                 fseek($file, $range);
             }
 
@@ -171,11 +155,11 @@ class sendfile
         }
         die();
     }
-
+    
     /**
      * method for getting mime type of a file
      * @param string $path
-     * @return string $mime_type
+     * @return string $mime_type 
      */
     private function getContentType($path) {
         $result = false;
@@ -194,7 +178,7 @@ class sendfile
         }
         return $result;
     }
-
+    
     /**
      * clean all buffers
      */
