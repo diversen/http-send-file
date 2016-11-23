@@ -3,8 +3,8 @@
 namespace diversen;
 
 /**
- * 
- * 
+ * Sends a file to a client, with support for (multiple) range requests. 
+ * It is also able to throttle the download.", 
  */
 class sendfile
 {
@@ -136,7 +136,7 @@ class sendfile
         $chunksize = $this->bytes; //you may want to change this
         $bytes_send = 0;
         
-        $file = @fopen($file_path, 'r');
+        $file = @fopen($file_path, 'rb');
         if ($file) {
             if (isset($_SERVER['HTTP_RANGE'])) {
                 fseek($file, $range);
