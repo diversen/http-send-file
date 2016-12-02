@@ -1,7 +1,7 @@
 {
     "name": "diversen/http-send-file",
     "type": "library",
-    "description": "Sends a file to a client, with support for (multiple) range requests. It is able to throttle the download.",
+    "description": "Sends a file to a client, with support for (multiple) range requests. It is also able to throttle the download.",
     "homepage": "http://github.com/diversen/http-send-file",
     "keywords": ["http", "file", "download", "resume", "throttle"],
     "license": "BSD-3-Clause",
