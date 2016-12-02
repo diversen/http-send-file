@@ -1,5 +1,13 @@
 <?php
 
+// Clone 
+// https://github.com/diversen/http-send-file
+// cd test/
+// php -S localhost:8080
+// oppen browser and go to: 
+// http://localhost:8080/japanese-char.php
+// Should download file with japanese char in filenamet
+
 include_once "../sendFile.php";
 
 use diversen\sendFile;
