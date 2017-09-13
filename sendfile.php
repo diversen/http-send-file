@@ -153,7 +153,6 @@ class sendfile
         } else {
             throw new \Exception('Error - can not open file.');
         }
-        die();
     }
     
     /**
