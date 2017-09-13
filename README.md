@@ -17,10 +17,6 @@ With composer add to your "require" section:
 
     composer require diversen/http-send-file
 
-Or add to `composer.json`
-
-     "diversen/http-send-file": "1.0.x",
-
 Usage example: 
 
 ~~~php
