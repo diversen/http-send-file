@@ -96,3 +96,4 @@ The process is nicely explained here:
 
 <http://www.media-division.com/the-right-way-to-handle-file-downloads-in-php/>
 
+MIT © [Dennis Iversen](https://github.com/diversen)

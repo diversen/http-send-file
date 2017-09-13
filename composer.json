@@ -4,7 +4,7 @@
     "description": "Sends a file to a client, with support for (multiple) range requests. It is also able to throttle the download.",
     "homepage": "http://github.com/diversen/http-send-file",
     "keywords": ["http", "file", "download", "resume", "throttle"],
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "authors": [
         {
             "name": "Dennis Iversen",
