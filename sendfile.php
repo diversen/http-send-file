@@ -76,7 +76,7 @@ class sendfile
      * @param boolean $withDisposition
      * @throws Exception
      */
-    public function send($file_path, $withDisposition=TRUE) {
+    public function send($file_path, $withDisposition=TRUE, $asAttachment=TRUE) {
         
         if (!is_readable($file_path)) {
             throw new \Exception('File not found or inaccessible!');
@@ -90,6 +90,10 @@ class sendfile
         if (!$this->type) {
             $this->type = $this->getContentType($file_path);
         }
+        
+        $contentDisposition = 'attachment';
+        if ($asAttachment === FALSE)
+            $contentDisposition = 'inline';
 
         //turn off output buffering to decrease cpu usage
         $this->cleanAll();
@@ -101,7 +105,7 @@ class sendfile
 
         header('Content-Type: ' . $this->type);
         if ($withDisposition) {
-            header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
+            header('Content-Disposition: ' . $contentDisposition . '; filename="' . $this->disposition . '"');
         }
         header('Accept-Ranges: bytes');
 
