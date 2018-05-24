@@ -16,10 +16,11 @@ class sendfile
     private $disposition = false;
     
     /**
-     * throttle speed in secounds
+     * throttle speed in seconds
+     * Defaults to no throttle
      * @var float $sec
      */
-    private $sec = 0.1;
+    private $sec = 0;
     
     /**
      * bytes per $sec
