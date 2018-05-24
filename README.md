@@ -15,7 +15,7 @@ Install
 
 With composer add to your "require" section: 
 
-    composer require diversen/http-send-file
+    composer require shemgp/http-send-file
 
 Usage example: 
 
@@ -80,6 +80,20 @@ Without sending content-disposition header:
 // 2. param = false
 try {
     $s->send($file, false);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
+
+~~~
+
+Send file as inline: 
+
+~~~php
+
+// Send as inline
+// 3. param = false
+try {
+    $s->send($file, true, false);
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
