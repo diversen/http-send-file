@@ -15,7 +15,7 @@ Install
 
 With composer add to your "require" section: 
 
-    composer require diversen/http-send-file
+    composer require shemgp/http-send-file
 
 Usage example: 
 
@@ -86,6 +86,20 @@ try {
 
 ~~~
 
+Send file as inline: 
+
+~~~php
+
+// Send as inline
+// 3. param = false
+try {
+    $s->send($file, true, false);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
+
+~~~
+
 # Credits 
 
 Much of the code is taken (and rewritten) from here: 
@@ -96,4 +110,4 @@ The process is nicely explained here:
 
 <http://www.media-division.com/the-right-way-to-handle-file-downloads-in-php/>
 
-MIT © [Dennis Iversen](https://github.com/diversen)
+MIT © [Dennis Iversen](https://github.com/diversen), [Shem Pasamba](https://github.com/shemgp)

@@ -1,6 +1,6 @@
 <?php
 
-namespace diversen;
+namespace shemgp;
 
 /**
  * Sends a file to a client, with support for (multiple) range requests. 
@@ -16,10 +16,11 @@ class sendfile
     private $disposition = false;
     
     /**
-     * throttle speed in secounds
+     * throttle speed in seconds
+     * Defaults to no throttle
      * @var float $sec
      */
-    private $sec = 0.1;
+    private $sec = 0;
     
     /**
      * bytes per $sec
@@ -76,7 +77,7 @@ class sendfile
      * @param boolean $withDisposition
      * @throws Exception
      */
-    public function send($file_path, $withDisposition=TRUE) {
+    public function send($file_path, $withDisposition=TRUE, $asDownload = TRUE) {
         
         if (!is_readable($file_path)) {
             throw new \Exception('File not found or inaccessible!');
@@ -99,9 +100,13 @@ class sendfile
             ini_set('zlib.output_compression', 'Off');
         }
 
+	$contentDisposition = 'download';
+	if (!$asDownload)
+		$contentDisposition = 'inline';
+
         header('Content-Type: ' . $this->type);
         if ($withDisposition) {
-            header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
+            header('Content-Disposition: ' . $contentDisposition . '; filename="' . $this->disposition . '"');
         }
         header('Accept-Ranges: bytes');
 

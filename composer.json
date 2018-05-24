@@ -1,5 +1,5 @@
 {
-    "name": "diversen/http-send-file",
+    "name": "shemgp/http-send-file",
     "type": "library",
     "description": "Sends a file to a client, with support for (multiple) range requests. It is also able to throttle the download.",
     "homepage": "http://github.com/diversen/http-send-file",
@@ -11,11 +11,17 @@
             "email": "dennis.iversen@gmail.com",
             "homepage": "http://www.coscms.org/",
             "role": "Developer"
+        },
+        {
+            "name": "Shem Pasamba",
+            "email": "shemgp@gmail.com",
+            "homepage": "http://www.aiias.edu/",
+            "role": "Developer"
         }
     ],
     "autoload": {
         "psr-4": {
-            "diversen\\": ""
+            "shemgp\\": ""
         }
     },
     "extra": {
