@@ -35,7 +35,7 @@ class sendfile
     
     /**
      * set content disposition 
-     * @param type $file_name
+     * @param mixed $file_name
      */
     public function contentDisposition ($file_name = false) {
         $this->disposition = $file_name;
@@ -61,7 +61,7 @@ class sendfile
 
     /**
      * get name from path info
-     * @param type $file
+     * @param mixed $file
      * @return type
      */
     private function name ($file) {
