@@ -101,7 +101,7 @@ class sendfile
 
         header('Content-Type: ' . $this->type);
         if ($withDisposition) {
-            header('Content-Disposition: attachment; filename="' . $this->disposition . '"');
+            header('Content-Disposition: attachment; filename="' . rawurlencode($this->disposition) . '"');
         }
         header('Accept-Ranges: bytes');
 
