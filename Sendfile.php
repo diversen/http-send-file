@@ -68,7 +68,7 @@ class Sendfile
     /**
      * Setup headers and starts transfering bytes
      */
-    public function send(string $file_path, bool $with_disposition = TRUE)
+    public function send(string $file_path, bool $with_disposition = true)
     {
 
         if (!is_readable($file_path)) {
