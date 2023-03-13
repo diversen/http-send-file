@@ -59,7 +59,7 @@ class Sendfile
     /**
      * get name from path info
      */
-    private function name(string $file)
+    private function getBaseName(string $file)
     {
         $info = pathinfo($file);
         return $info['basename'];
@@ -77,7 +77,7 @@ class Sendfile
 
         $size = filesize($file_path);
         if (empty($this->disposition)) {
-            $this->disposition = $this->name($file_path);
+            $this->disposition = $this->getBaseName($file_path);
         }
 
         if (empty($this->content_type)) {
