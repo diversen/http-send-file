@@ -1,106 +1,99 @@
 <?php
 
-namespace diversen;
+namespace Diversen;
+
+use Exception;
 
 /**
  * Sends a file to a client, with support for (multiple) range requests. 
  * It is also able to throttle the download.", 
  */
-class sendfile
+class Sendfile
 {
-    //public 
     /**
-     * if false we set content disposition from file that will be sent
-     * @var mixed $disposition    
+     * if false we set content disposition from file that will be sent 
      */
-    private $disposition = false;
-    
+    private string $disposition = '';
+
     /**
      * throttle speed in secounds
-     * @var float $sec
      */
-    private $sec = 0.1;
-    
+    private float $sec = 0.1;
+
     /**
      * bytes per $sec
-     * @var int $bytes 
      */
-    private $bytes = 40960;
-    
+    private int $bytes = 40960;
+
     /**
      * if contentType is false we try to guess it
-     * @var mixed $contentType 
      */
-    private $type = false;
-    
+    private string $content_type = '';
+
     /**
-     * set content disposition 
-     * @param mixed $file_name
+     * set content disposition. Name of file that will be sent to client
+     * if empty we try to guess it from file path
      */
-    public function contentDisposition ($file_name = false) {
+    public function setContentDisposition(string $file_name = '')
+    {
         $this->disposition = $file_name;
     }
-    
+
     /**
      * set throttle speed
-     * @param float $sec
-     * @param int $bytes
      */
-    public function throttle ($sec = 0.1, $bytes = 40960) {
+    public function throttle(float $sec = 0.1, int $bytes = 40960)
+    {
         $this->sec = $sec;
         $this->bytes = $bytes;
     }
-    
+
     /**
-     * set content mime type if false we try to guess it
-     * @param string $content_type
+     * set content content type if empty we try to guess it
      */
-    public function contentType ($content_type = null) {
-        $this->type = $content_type;
+    public function setContentType(string $content_type = '')
+    {
+        $this->content_type = $content_type;
     }
 
     /**
      * get name from path info
-     * @param mixed $file
-     * @return type
      */
-    private function name ($file) {
+    private function name(string $file)
+    {
         $info = pathinfo($file);
-        return $info['basename'];  
+        return $info['basename'];
     }
 
     /**
-     * Sets-up headers and starts transfering bytes
-     * 
-     * @param string  $file_path
-     * @param boolean $withDisposition
-     * @throws Exception
+     * Setup headers and starts transfering bytes
      */
-    public function send($file_path, $withDisposition=TRUE) {
-        
+    public function send(string $file_path, bool $with_disposition = TRUE)
+    {
+
         if (!is_readable($file_path)) {
-            throw new \Exception('File not found or inaccessible!');
+            throw new Exception('File not found or inaccessible!');
         }
 
         $size = filesize($file_path);
-        if (!$this->disposition) {
+        if (empty($this->disposition)) {
             $this->disposition = $this->name($file_path);
         }
-        
-        if (!$this->type) {
-            $this->type = $this->getContentType($file_path);
+
+        if (empty($this->content_type)) {
+            $this->content_type = $this->getContentType($file_path);
         }
 
         //turn off output buffering to decrease cpu usage
         $this->cleanAll();
-        
+
         // required for IE, otherwise Content-Disposition may be ignored
         if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
         }
 
-        header('Content-Type: ' . $this->type);
-        if ($withDisposition) {
+        header('Content-Type: ' . $this->content_type);
+        if ($with_disposition) {
             header('Content-Disposition: attachment; filename="' . rawurlencode($this->disposition) . '"');
         }
         header('Accept-Ranges: bytes');
@@ -132,35 +125,34 @@ class sendfile
             header("Content-Length: " . $size);
         }
 
-        /* output the file itself */
-        $chunksize = $this->bytes; //you may want to change this
+        // output the file itself 
+        $chunksize = $this->bytes;
         $bytes_send = 0;
-        
+
         $file = @fopen($file_path, 'rb');
         if ($file) {
             if (isset($_SERVER['HTTP_RANGE'])) {
                 fseek($file, $range);
             }
 
-            while (!feof($file) && (!connection_aborted()) && ($bytes_send < $new_length) ) {
+            while (!feof($file) && (!connection_aborted()) && ($bytes_send < $new_length)) {
                 $buffer = fread($file, $chunksize);
-                echo($buffer); //echo($buffer); // is also possible
+                echo ($buffer);
                 flush();
                 usleep($this->sec * 1000000);
                 $bytes_send += strlen($buffer);
             }
             fclose($file);
         } else {
-            throw new \Exception('Error - can not open file.');
+            throw new Exception('Error - can not open file.');
         }
     }
-    
+
     /**
      * method for getting mime type of a file
-     * @param string $path
-     * @return string $mime_type 
      */
-    private function getContentType($path) {
+    private function getContentType(string $path)
+    {
         $result = false;
         if (is_file($path) === true) {
             if (function_exists('finfo_open') === true) {
@@ -177,11 +169,12 @@ class sendfile
         }
         return $result;
     }
-    
+
     /**
      * clean all buffers
      */
-    private function cleanAll() {
+    private function cleanAll()
+    {
         while (ob_get_level()) {
             ob_end_clean();
         }

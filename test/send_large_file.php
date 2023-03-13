@@ -2,10 +2,10 @@
 
 require_once "../vendor/autoload.php";
 
-use diversen\sendfile;
+use Diversen\Sendfile;
 
-$s = new sendfile();
-$s->contentDisposition('test.txt');
+$s = new SendFile();
+$s->setContentDisposition('test.txt');
 
 // if you don't set type - we will try to guess it
 

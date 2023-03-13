@@ -21,15 +21,15 @@ Usage example:
 
 ~~~php
 
-use diversen\sendfile;
-$s = new sendfile();
+use Diversen\Sendfile;
+$s = new Sendfile();
         
 // if you don't set type - we will try to guess it
-$s->contentType('application/epub+zip');
+$s->setContentType('application/epub+zip');
         
 // if you don't set disposition (file name user agent will see)
 // we will make a file name from file
-$s->contentDisposition('test.epub');
+$s->setContentDisposition('test.epub');
         
 // chunks of 40960 bytes per 0.1 secs
 // if you don't set this then the values below are the defaults
@@ -52,8 +52,8 @@ So you could just do like this:
 
 ~~~php
 
-use diversen\sendfile;
-$s = new sendfile();
+use Diversen\Sendfile;
+$s = new Sendfile();
 
 // file
 $file = '/some/dir/test.epub';

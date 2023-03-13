@@ -9,9 +9,9 @@
 
 require_once "../vendor/autoload.php";
 
-use diversen\sendfile;
+use Diversen\Sendfile;
 
-$s = new sendfile();
+$s = new Sendfile();
 
 // if you don't set type - we will try to guess it
 
