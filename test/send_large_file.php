@@ -13,7 +13,7 @@ $s->contentDisposition('test.txt');
 // we will make a file name from file
 //$s->contentDisposition('test.epub');
 
-// 2048 bytes per 2 sec
+// 2048 bytes per 1 sec
 $s->throttle(1, 2048);
 
 // file
