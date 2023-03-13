@@ -7,9 +7,9 @@
 // http://localhost:8080/japanese-char.php
 // Should download file with japanese char in filename
 
-include_once "../sendFile.php";
+require_once "../vendor/autoload.php";
 
-use diversen\sendFile;
+use diversen\sendfile;
 
 $s = new sendfile();
 
