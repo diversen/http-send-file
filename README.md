@@ -33,7 +33,7 @@ $s->setContentDisposition('test.epub');
         
 // chunks of 40960 bytes per 0.1 secs
 // if you don't set this then the values below are the defaults
-// approx 409600 bytes per sec
+// approx 40960 bytes per sec
 $s->throttle(0.1, 40960);
 
 // file
