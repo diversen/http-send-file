@@ -1,7 +1,7 @@
 # HTTP send file
 
 Sends a file with support for (multiple) range requests. 
-It is able to throttle the download and adds an etag to the request.  
+It is able to throttle the download and adds an etag to the request.
 It is quite small and simple.
 
 # Install
