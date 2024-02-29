@@ -102,7 +102,7 @@ class Sendfile
     /**
      * Prepares and sends HTTP headers.
      */
-    private function prepareHeaders(string $file_path, bool $with_disposition): int
+    private function prepareHeaders(string $file_path, bool $with_disposition): ?int
     {
         $size = filesize($file_path);
         $lastModified = filemtime($file_path);
@@ -116,22 +116,23 @@ class Sendfile
             return null;
         }
 
-        if ($with_disposition) { 
-            $filename = $this->disposition ?: $this->getBaseName($file_path); 
+        if ($with_disposition) {
+            $filename = $this->disposition ?: $this->getBaseName($file_path);
         } else {
             $filename = '';
         }
 
         $this->setDownloadHeaders($filename);
-        
+
         header('Content-Type: ' . ($this->content_type ?: $this->getContentType($file_path)));
         header('Accept-Ranges: bytes');
-        header("Cache-control: private");
+        header("Cache-control: must-revalidate, private");
         header('Pragma: private');
         $this->setExpiresHeader();
 
         return $size;
     }
+
 
     /**
      * Sets the Expires header based on the expiresSeconds property.
@@ -151,8 +152,20 @@ class Sendfile
      */
     private function clientCacheIsValid(string $etag): bool
     {
-        return isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) == '"' . $etag . '"';
+        if (!isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+            return false;
+        }
+
+        // Normalize ETag values for comparison
+        $clientEtag = trim($_SERVER['HTTP_IF_NONE_MATCH'], "\"");
+        $serverEtag = trim($etag);
+
+        // Optionally strip known suffixes like "-gzip"
+        $clientEtag = preg_replace('/-gzip$/', '', $clientEtag);
+
+        return $clientEtag === $serverEtag;
     }
+
 
     /**
      * Sets headers related to file download.
