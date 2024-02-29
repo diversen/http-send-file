@@ -8,10 +8,10 @@ $s = new SendFile();
 $s->setExpires(3600);
 
 // 8096 bytes per 1 sec
-$s->throttle(1, 8096);
+$s->throttle(1, 2* 8096);
 
 // file
-$file = './dummy.pdf';
+$file = './large_file.txt';
 
 // send the file
 try {
