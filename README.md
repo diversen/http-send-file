@@ -1,7 +1,7 @@
 # HTTP send file
 
 Sends a file with support for (multiple) range requests. 
-It is able to throttle the download.
+It is able to throttle the download. It will also sends an etag. 
 It is quite small and simple.
 
 This class resembles the php http_send_file from PHP pecl
@@ -11,7 +11,6 @@ See:
 <http://php.net/manual/en/function.http-send-file.php> 
 
 Install
-
 
 With composer add to your "require" section: 
 
@@ -30,6 +29,9 @@ $s->setContentType('application/epub+zip');
 // if you don't set disposition (file name user agent will see)
 // we will make a file name from file
 $s->setContentDisposition('test.epub');
+
+// Expires header
+$s->setExpires(3600);
         
 // chunks of 40960 bytes per 0.1 secs
 // if you don't set this then the values below are the defaults
@@ -85,6 +87,22 @@ try {
 }
 
 ~~~
+
+# Test notes
+
+Build image:
+
+    docker build -t my-php-app .
+
+Run the docker image:
+
+    docker run -d -p 8080:80 -v $(pwd)/test:/var/www/html --name test-server my-php-app 
+
+Go to the browser at: http://localhost:8080/test/index.php
+
+Or use curl, e.g.: 
+
+    curl -v -L -O -C - http://localhost:8080/test/send_large_file.php
 
 # Credits 
 

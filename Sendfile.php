@@ -31,6 +31,20 @@ class Sendfile
     private string $content_type = '';
 
     /**
+     * The number of seconds until the content expires. 
+     * If not set, defaults to a date in the past.
+     */
+    private ?int $expiresSeconds = null;
+
+    /**
+     * Sets the number of seconds until the content should be considered expired.
+     */
+    public function setExpires(int $secs)
+    {
+        $this->expiresSeconds = $secs;
+    }
+
+    /**
      * set content disposition. Name of file that will be sent to client
      * if empty we try to guess it from file path
      */
@@ -65,110 +79,183 @@ class Sendfile
         return $info['basename'];
     }
 
+
     /**
-     * Setup headers and starts transfering bytes
+     * Send the file
      */
     public function send(string $file_path, bool $with_disposition = true)
     {
-
         if (!is_readable($file_path)) {
             throw new Exception('File not found or inaccessible!');
         }
 
+        $size = $this->prepareHeaders($file_path, $with_disposition);
+        if (is_null($size)) {
+            return;
+        }
+
+        $range = $this->processRangeHeader($size);
+        $this->outputFileContents($file_path, $range);
+    }
+
+    /**
+     * Prepares and sends HTTP headers.
+     */
+    private function prepareHeaders(string $file_path, bool $with_disposition): int
+    {
         $size = filesize($file_path);
-        if (empty($this->disposition)) {
-            $this->disposition = $this->getBaseName($file_path);
+        $lastModified = filemtime($file_path);
+        $etag = md5($file_path . $size . $lastModified);
+
+        header('Etag: "' . $etag . '"');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
+
+        if ($this->clientCacheIsValid($etag)) {
+            header("HTTP/1.1 304 Not Modified");
+            return null;
         }
 
-        if (empty($this->content_type)) {
-            $this->content_type = $this->getContentType($file_path);
+        if ($with_disposition) {
+            $filename = $this->disposition ?: $this->getBaseName($file_path);
+        } else {
+            $filename = '';
         }
 
-        //turn off output buffering to decrease cpu usage
-        $this->cleanAll();
+        $this->setDownloadHeaders($filename);
+        header('Content-Type: ' . ($this->content_type ?: $this->getContentType($file_path)));
+        header('Accept-Ranges: bytes');
+        header('Pragma: private');
+        $this->setExpiresHeader();
 
-        // required for IE, otherwise Content-Disposition may be ignored
+        return $size;
+    }
+
+    /**
+     * Sets the Expires header based on the expiresSeconds property.
+     */
+    private function setExpiresHeader()
+    {
+        if (is_null($this->expiresSeconds)) {
+            header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Default behavior
+            header("Cache-Control: no-store, no-cache, must-revalidate");
+        } else {
+            $expiresTime = gmdate('D, d M Y H:i:s', time() + $this->expiresSeconds) . ' GMT';
+            header("Expires: " . $expiresTime);
+            header("Cache-Control: max-age=" . $this->expiresSeconds);
+        }
+    }
+
+    /**
+     * Checks if client cache is still valid.
+     */
+    private function clientCacheIsValid(string $etag): bool
+    {
+        return isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) == '"' . $etag . '"';
+    }
+
+    /**
+     * Sets headers related to file download.
+     */
+    private function setDownloadHeaders(string $filename)
+    {
         if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
         }
 
-        header('Content-Type: ' . $this->content_type);
-        if ($with_disposition) {
-            header('Content-Disposition: attachment; filename="' . rawurlencode($this->disposition) . '"');
+        if ($filename) {
+            header('Content-Disposition: attachment; filename="' . rawurlencode($filename) . '"');
         }
-        header('Accept-Ranges: bytes');
+    }
 
-        // The three lines below basically make the
-        // download non-cacheable 
-        header("Cache-control: private");
-        header('Pragma: private');
-        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-
-        // multipart-download and download resuming support
+    /**
+     * Handles range requests.
+     */
+    private function processRangeHeader(int $size): array
+    {
         if (isset($_SERVER['HTTP_RANGE'])) {
             list($a, $range) = explode("=", $_SERVER['HTTP_RANGE'], 2);
             list($range) = explode(",", $range, 2);
             list($range, $range_end) = explode("-", $range);
             $range = intval($range);
-            if (!$range_end) {
-                $range_end = $size - 1;
-            } else {
-                $range_end = intval($range_end);
-            }
+            $range_end = ($range_end !== '') ? intval($range_end) : $size - 1;
 
-            $new_length = $range_end - $range + 1;
             header("HTTP/1.1 206 Partial Content");
-            header("Content-Length: $new_length");
+            header("Content-Length: " . ($range_end - $range + 1));
             header("Content-Range: bytes $range-$range_end/$size");
+
+            return [$range, $range_end, $size];
         } else {
-            $new_length = $size;
-            header("Content-Length: " . $size);
-        }
-
-        // output the file itself 
-        $chunksize = $this->bytes;
-        $bytes_send = 0;
-
-        $file = @fopen($file_path, 'rb');
-        if ($file) {
-            if (isset($_SERVER['HTTP_RANGE'])) {
-                fseek($file, $range);
-            }
-
-            while (!feof($file) && (!connection_aborted()) && ($bytes_send < $new_length)) {
-                $buffer = fread($file, $chunksize);
-                echo ($buffer);
-                flush();
-                usleep($this->sec * 1000000);
-                $bytes_send += strlen($buffer);
-            }
-            fclose($file);
-        } else {
-            throw new Exception('Error - can not open file.');
+            header("Content-Length: $size");
+            return [0, $size - 1, $size];
         }
     }
 
     /**
-     * method for getting mime type of a file
+     * Outputs the file content.
      */
-    private function getContentType(string $path)
+    private function outputFileContents(string $file_path, array $range)
     {
-        $result = false;
-        if (is_file($path) === true) {
-            if (function_exists('finfo_open') === true) {
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                if (is_resource($finfo) === true) {
-                    $result = finfo_file($finfo, $path);
-                }
-                finfo_close($finfo);
-            } else if (function_exists('mime_content_type') === true) {
-                $result = preg_replace('~^(.+);.*$~', '$1', mime_content_type($path));
-            } else if (function_exists('exif_imagetype') === true) {
-                $result = image_type_to_mime_type(exif_imagetype($path));
+        [$start, $end, $fileSize] = $range;
+        $this->cleanAll();
+
+        $file = @fopen($file_path, 'rb');
+        if (!$file) {
+            throw new Exception("SendFile. The file {$file_path} cannot be opened.");
+        }
+
+        $this->cleanAll();
+
+        // If the requested range covers the entire file, use readfile()
+        if ($start === 0 && $end >= $fileSize - 1) {
+            header("Content-Length: " . $fileSize);
+            readfile($file_path);
+            fclose($file);
+        } else {
+            // If not serving the entire file, read the range and send it
+            $file = @fopen($file_path, 'rb');
+            if (!$file) {
+                throw new Exception("SendFile. The file {$file_path} cannot be opened.");
+            }
+
+            fseek($file, $start);
+            $bytes_send = $start;
+            while (!feof($file) && !connection_aborted() && $bytes_send <= $end) {
+                $buffer = fread($file, $this->bytes);
+                echo $buffer;
+                flush();
+                usleep($this->sec * 1000000);
+                $bytes_send += strlen($buffer);
+            }
+
+            fclose($file);
+        }
+    }
+
+
+    /**
+     *  Get content type
+     */
+    private function getContentType(string $path): string
+    {
+        $mimeType = 'application/octet-stream'; // Default MIME type if detection fails
+
+        if (!is_file($path)) {
+            return $mimeType;
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo !== false) {
+            $detectedType = finfo_file($finfo, $path);
+            finfo_close($finfo);
+
+            if ($detectedType !== false) {
+                $mimeType = $detectedType;
             }
         }
-        return $result;
+
+        return $mimeType;
     }
+
 
     /**
      * clean all buffers
