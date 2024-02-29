@@ -1,16 +1,10 @@
 # HTTP send file
 
 Sends a file with support for (multiple) range requests. 
-It is able to throttle the download. It will also sends an etag. 
+It is able to throttle the download and adds an etag to the request.  
 It is quite small and simple.
 
-This class resembles the php http_send_file from PHP pecl
-
-See: 
-
-<http://php.net/manual/en/function.http-send-file.php> 
-
-Install
+# Install
 
 With composer add to your "require" section: 
 
@@ -30,7 +24,7 @@ $s->setContentType('application/epub+zip');
 // we will make a file name from file
 $s->setContentDisposition('test.epub');
 
-// Expires header
+// Expires header. Default is a date in the past
 $s->setExpires(3600);
         
 // chunks of 40960 bytes per 0.1 secs
