@@ -5,24 +5,17 @@ require_once "../vendor/autoload.php";
 use Diversen\Sendfile;
 
 $s = new SendFile();
-$s->setContentDisposition('test.txt');
+$s->setExpires(3600);
 
-// if you don't set type - we will try to guess it
-
-// if you don't set disposition (file name user agent will see)
-// we will make a file name from file
-//$s->contentDisposition('test.epub');
-
-// 2048 bytes per 1 sec
-$s->throttle(1, 2048);
+// 8096 bytes per 1 sec
+$s->throttle(1, 8096);
 
 // file
-$file = './large_file.txt';
+$file = './dummy.pdf';
 
 // send the file
 try {
-    $s->send($file);
+    $s->send($file, true);
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
- 
