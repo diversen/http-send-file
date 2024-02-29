@@ -196,7 +196,6 @@ class Sendfile
     private function outputFileContents(string $file_path, array $range)
     {
         [$start, $end, $fileSize] = $range;
-        $this->cleanAll();
 
         $file = @fopen($file_path, 'rb');
         if (!$file) {
@@ -212,11 +211,6 @@ class Sendfile
             fclose($file);
         } else {
             // If not serving the entire file, read the range and send it
-            $file = @fopen($file_path, 'rb');
-            if (!$file) {
-                throw new Exception("SendFile. The file {$file_path} cannot be opened.");
-            }
-
             fseek($file, $start);
             $bytes_send = $start;
             while (!feof($file) && !connection_aborted() && $bytes_send <= $end) {
