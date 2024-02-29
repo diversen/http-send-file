@@ -90,11 +90,12 @@ class Sendfile
         }
 
         $size = $this->prepareHeaders($file_path, $with_disposition);
-        if (is_null($size)) {
-            return;
+        if ($size === null) {
+            return null;
         }
 
         $range = $this->processRangeHeader($size);
+
         $this->outputFileContents($file_path, $range);
     }
 
@@ -115,15 +116,17 @@ class Sendfile
             return null;
         }
 
-        if ($with_disposition) {
-            $filename = $this->disposition ?: $this->getBaseName($file_path);
+        if ($with_disposition) { 
+            $filename = $this->disposition ?: $this->getBaseName($file_path); 
         } else {
             $filename = '';
         }
 
         $this->setDownloadHeaders($filename);
+        
         header('Content-Type: ' . ($this->content_type ?: $this->getContentType($file_path)));
         header('Accept-Ranges: bytes');
+        header("Cache-control: private");
         header('Pragma: private');
         $this->setExpiresHeader();
 
@@ -136,12 +139,10 @@ class Sendfile
     private function setExpiresHeader()
     {
         if (is_null($this->expiresSeconds)) {
-            header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Default behavior
-            header("Cache-Control: no-store, no-cache, must-revalidate");
+            header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
         } else {
             $expiresTime = gmdate('D, d M Y H:i:s', time() + $this->expiresSeconds) . ' GMT';
             header("Expires: " . $expiresTime);
-            header("Cache-Control: max-age=" . $this->expiresSeconds);
         }
     }
 
@@ -183,10 +184,10 @@ class Sendfile
             header("Content-Length: " . ($range_end - $range + 1));
             header("Content-Range: bytes $range-$range_end/$size");
 
-            return [$range, $range_end, $size];
+            return [$range, $range_end];
         } else {
             header("Content-Length: $size");
-            return [0, $size - 1, $size];
+            return [0, $size - 1];
         }
     }
 
@@ -195,36 +196,25 @@ class Sendfile
      */
     private function outputFileContents(string $file_path, array $range)
     {
-        [$start, $end, $fileSize] = $range;
-
+        [$start, $end] = $range;
+        $this->cleanAll();
         $file = @fopen($file_path, 'rb');
         if (!$file) {
-            throw new Exception("SendFile. The file {$file_path} cannot be opened.");
+            throw new Exception('Error - can not open file.');
         }
 
-        $this->cleanAll();
-
-        // If the requested range covers the entire file, use readfile()
-        if ($start === 0 && $end >= $fileSize - 1) {
-            header("Content-Length: " . $fileSize);
-            readfile($file_path);
-            fclose($file);
-        } else {
-            // If not serving the entire file, read the range and send it
-            fseek($file, $start);
-            $bytes_send = $start;
-            while (!feof($file) && !connection_aborted() && $bytes_send <= $end) {
-                $buffer = fread($file, $this->bytes);
-                echo $buffer;
-                flush();
-                usleep($this->sec * 1000000);
-                $bytes_send += strlen($buffer);
-            }
-
-            fclose($file);
+        fseek($file, $start);
+        $bytes_send = $start;
+        while (!feof($file) && !connection_aborted() && $bytes_send <= $end) {
+            $buffer = fread($file, $this->bytes);
+            echo $buffer;
+            flush();
+            usleep($this->sec * 1000000);
+            $bytes_send += strlen($buffer);
         }
+
+        fclose($file);
     }
-
 
     /**
      *  Get content type
