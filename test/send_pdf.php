@@ -5,13 +5,13 @@ require_once "../vendor/autoload.php";
 use Diversen\Sendfile;
 
 $s = new SendFile();
-$s->setExpires(3600);
+// $s->setExpires(3600);
 
-// 8096 bytes per 1 sec
-$s->throttle(1, 2* 8096);
+// Bytes per 1 second
+$s->throttle(1, 8* 1024);
 
 // file
-$file = './large_file.txt';
+$file = './dummy.pdf';
 
 // send the file
 try {

@@ -1,10 +1,9 @@
-<h1>
-    TEST 2
-</h1>
-
 <p>
-    <a href="send_large_file.php">send_large_file.php</a>
+    <a href="/test/send_text.php">Download text file</a>
 </p>
 <p>
-    <a href="japanese_char.php">japanese_char.php</a>
+    <a href="/test/send_pdf.php">Download PDF file</a>
+</p>
+<p>
+    <a href="/test/japanese_char.php">japanese_char.php</a>
 </p>
