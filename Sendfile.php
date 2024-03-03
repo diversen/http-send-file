@@ -28,7 +28,7 @@ class Sendfile
     /**
      * if contentType is false we try to guess it
      */
-    private string $content_type = '';
+    private string $contentType = '';
 
     /**
      * The number of seconds until the content expires. 
@@ -67,7 +67,7 @@ class Sendfile
      */
     public function setContentType(string $content_type = '')
     {
-        $this->content_type = $content_type;
+        $this->contentType = $content_type;
     }
 
     /**
@@ -86,7 +86,7 @@ class Sendfile
     public function send(string $file_path, bool $with_disposition = true)
     {
         if (!is_readable($file_path)) {
-            throw new Exception('File not found or inaccessible!');
+            throw new Exception("File {$file_path} not found or inaccessible.");
         }
 
         $size = $this->prepareHeaders($file_path, $with_disposition);
@@ -124,7 +124,7 @@ class Sendfile
 
         $this->setDownloadHeaders($filename);
 
-        header('Content-Type: ' . ($this->content_type ?: $this->getContentType($file_path)));
+        header('Content-Type: ' . ($this->contentType ?: $this->getContentType($file_path)));
         header('Accept-Ranges: bytes');
         header("Cache-control: must-revalidate, private");
         header('Pragma: private');
@@ -217,7 +217,7 @@ class Sendfile
         $this->cleanAll();
         $file = @fopen($file_path, 'rb');
         if (!$file) {
-            throw new Exception('Error - can not open file.');
+            throw new Exception("Can not open file {$file_path} for reading.");
         }
 
         fseek($file, $start);
