@@ -86,13 +86,17 @@ try {
 
 Build image:
 
-    docker build -t my-php-app .
+    docker build -t php-apache2 .
 
 Run the docker image:
 
-    docker run -d -p 8080:80 -v $(pwd)/test:/var/www/html --name test-server my-php-app 
+    docker run -d -p 8080:80 -v $(pwd):/var/www/html --name test-send-file php-apache2
 
-Go to the browser at: http://localhost:8080/test/index.php
+Enable autoloading: 
+
+    composer install
+
+Go to the browser at: http://localhost:8080/test
 
 Or use curl, e.g.: 
 

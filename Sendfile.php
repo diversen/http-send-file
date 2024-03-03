@@ -152,6 +152,7 @@ class Sendfile
      */
     private function clientCacheIsValid(string $etag): bool
     {
+
         if (!isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
             return false;
         }
@@ -160,8 +161,11 @@ class Sendfile
         $clientEtag = trim($_SERVER['HTTP_IF_NONE_MATCH'], "\"");
         $serverEtag = trim($etag);
 
-        // Optionally strip known suffixes like "-gzip"
+        // Optionally strip known suffixes like "-gzip" and "-gunzip"
+        // This is related to apache mod_deflate configuration
+        // I don't know if it's needed for other web servers
         $clientEtag = preg_replace('/-gzip$/', '', $clientEtag);
+        $clientEtag = preg_replace('/-gunzip$/', '', $clientEtag);
 
         return $clientEtag === $serverEtag;
     }
