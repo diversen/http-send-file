@@ -211,23 +211,34 @@ class Sendfile
     /**
      * Outputs the file content.
      */
-    private function outputFileContents(string $file_path, array $range)
+    private function outputFileContents(string $file_path, array $range): void
     {
         [$start, $end] = $range;
         $this->cleanAll();
+        $length = $end - $start + 1; // exactly what you promised
+        $chunkSize = $this->bytes;
+        $pauseUs = (int)($this->sec * 1e6);
+
         $file = @fopen($file_path, 'rb');
         if (!$file) {
-            throw new Exception("Can not open file {$file_path} for reading.");
+            throw new Exception("Cannot open {$file_path}");
         }
-
         fseek($file, $start);
-        $bytes_send = $start;
-        while (!feof($file) && !connection_aborted() && $bytes_send <= $end) {
-            $buffer = fread($file, $this->bytes);
+
+        $sent = 0;
+        while ($sent < $length && !feof($file) && ! connection_aborted()) {
+            // never read past the end of the requested range
+            $toRead = min($chunkSize, $length - $sent);
+            $buffer = fread($file, $toRead);
+            if ($buffer === false || $buffer === '') {
+                break;  // I/O error or nothing left
+            }
+
             echo $buffer;
             flush();
-            usleep($this->sec * 1000000);
-            $bytes_send += strlen($buffer);
+            usleep($pauseUs);
+
+            $sent += strlen($buffer);
         }
 
         fclose($file);

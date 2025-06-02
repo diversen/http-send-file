@@ -100,7 +100,9 @@ Go to the browser at: http://localhost:8080/test
 
 Or use curl, e.g.: 
 
-    curl -v -L -O -C - http://localhost:8080/test/send_large_file.php
+Test that download is resumable:
+
+    curl -v -L -C - -o test.pdf http://localhost:8080/test/slow_download.php
 
 # Credits 
 
